@@ -1,0 +1,10 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        app:iconSpaceReserved="false"
+        app:key="ynab_api_token"
+        app:summary="API Token for YNAB Access"
+        app:isPreferenceVisible="true"
+        app:title="YNAB API Token" />
+
+</PreferenceScreen>
