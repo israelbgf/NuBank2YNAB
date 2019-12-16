@@ -41,7 +41,7 @@ class CreateYNABTransactionFromNuBankNotification(private val YNABGateway: YNABG
         var amountAsText = "R\\$ (.*) APROVADA".toRegex().find(text)?.groups?.get(1)?.value ?: "0"
         var amountWithoutFormatting = amountAsText.replace("[\\.\\,]".toRegex(), "")
         var amoutWithExtraZeroForYNAB = amountWithoutFormatting + "0"
-        return Integer.parseInt(amoutWithExtraZeroForYNAB)
+        return -Integer.parseInt(amoutWithExtraZeroForYNAB)
     }
 
     private fun extractPayee(text: String): String {
