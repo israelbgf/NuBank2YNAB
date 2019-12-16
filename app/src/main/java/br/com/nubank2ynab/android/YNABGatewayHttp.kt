@@ -16,6 +16,7 @@ class YNABGatewayHttp(val YNABAPIToken: String, val budgetId: String, val accoun
         val postData = mapOf("transaction" to mapOf(
                 "account_id" to accountId,
                 "amount" to transaction.amount,
+                "category_id" to transaction.categoryId,
                 "date" to transaction.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 "memo" to transaction.payee))
 

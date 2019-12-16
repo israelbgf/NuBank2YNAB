@@ -1,6 +1,8 @@
-package com.example.nubank2ynab
+package br.com.nubank2ynab
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import br.com.nubank2ynab.android.HardcodedConfig
+import br.com.nubank2ynab.android.YNABGatewayHttp
 import br.com.nubank2ynab.core.YNABTransaction
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -10,7 +12,10 @@ import java.time.LocalDateTime
 class YNABGatewayHttpTest {
     @Test
     fun gatewayTest() {
-        var gateway = YNABGatewayHttp("")
-        gateway.create(YNABTransaction("Test", 10, LocalDateTime.now()))
+        val gateway = YNABGatewayHttp(HardcodedConfig.YNAB_API_TOKEN,
+                HardcodedConfig.BUDGET_ID, HardcodedConfig.ACCOUNT_ID)
+
+        gateway.create(YNABTransaction("Test Android App", -999, LocalDateTime.now(),
+                categoryId = null))
     }
 }

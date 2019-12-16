@@ -3,9 +3,12 @@ package br.com.nubank2ynab.core
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-class CreateYNABTransactionFromNuBankNotification(private val YNABGateway: YNABGateway) {
+class CreateYNABTransactionFromNuBankNotification(
+        private val YNABGateway: YNABGateway,
+        private val payeeToCategoryGateway: PayeeToCategoryGateway
+) {
 
-    private var lastDuplicationTimeout: LocalDateTime = LocalDateTime.now();
+    private var lastDuplicationTimeout: LocalDateTime = LocalDateTime.now()
     private var duplicationControl: MutableSet<String> = mutableSetOf()
 
     fun create(packageName: String, notificationText: String) {
@@ -13,18 +16,19 @@ class CreateYNABTransactionFromNuBankNotification(private val YNABGateway: YNABG
         if (isNotNubankNotification) return
         if (isDuplicateNotification(notificationText)) return
 
+        val payee = extractPayee(notificationText)
         this.YNABGateway.create(YNABTransaction(
-                extractPayee(notificationText),
+                payee,
                 extractAmount(notificationText),
-                LocalDateTime.now()))
+                LocalDateTime.now(), payeeToCategoryGateway.get(payee)))
     }
 
     private fun isDuplicateNotification(notificationText: String): Boolean {
         val now = LocalDateTime.now()
         val timeSinceDuplicationControlIsNotReset = now.toEpochSecond(ZoneOffset.UTC) - lastDuplicationTimeout.toEpochSecond(ZoneOffset.UTC)
-        if(timeSinceDuplicationControlIsNotReset > 10) {
+        if (timeSinceDuplicationControlIsNotReset > 10) {
             duplicationControl.clear()
-            lastDuplicationTimeout = now;
+            lastDuplicationTimeout = now
         }
 
         if (duplicationControl.contains(notificationText)) {
@@ -38,9 +42,9 @@ class CreateYNABTransactionFromNuBankNotification(private val YNABGateway: YNABG
 
 
     private fun extractAmount(text: String): Int {
-        var amountAsText = "R\\$ (.*) APROVADA".toRegex().find(text)?.groups?.get(1)?.value ?: "0"
-        var amountWithoutFormatting = amountAsText.replace("[\\.\\,]".toRegex(), "")
-        var amoutWithExtraZeroForYNAB = amountWithoutFormatting + "0"
+        val amountAsText = "R\\$ (.*) APROVADA".toRegex().find(text)?.groups?.get(1)?.value ?: "0"
+        val amountWithoutFormatting = amountAsText.replace("[.,]".toRegex(), "")
+        val amoutWithExtraZeroForYNAB = amountWithoutFormatting + "0"
         return -Integer.parseInt(amoutWithExtraZeroForYNAB)
     }
 

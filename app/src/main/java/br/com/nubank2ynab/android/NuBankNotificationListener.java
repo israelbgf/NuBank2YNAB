@@ -4,26 +4,43 @@ import android.os.AsyncTask;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import br.com.nubank2ynab.core.CreateYNABTransactionFromNuBankNotification;
+import br.com.nubank2ynab.core.PayeeToCategoryGateway;
 
 
 public class NuBankNotificationListener extends NotificationListenerService {
 
     private static NuBankNotificationListener instance;
-    private CreateYNABTransactionFromNuBankNotification createYNABTransactionFromNuBankNotification;
+    private CreateYNABTransactionFromNuBankNotification usecase;
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
-        createYNABTransactionFromNuBankNotification = new CreateYNABTransactionFromNuBankNotification(new YNABGatewayHttp(YNAB_API_TOKEN, BUDGET_ID, ACCOUNT_ID));
+        usecase = new CreateYNABTransactionFromNuBankNotification(
+                new YNABGatewayHttp(HardcodedConfig.YNAB_API_TOKEN, HardcodedConfig.BUDGET_ID, HardcodedConfig.ACCOUNT_ID),
+                new PayeeToCategoryGateway() {
+
+                    @Override
+                    public void put(@NotNull String payee, @NotNull String categoryId) {
+
+                    }
+                    @Nullable
+                    @Override
+                    public String get(@NotNull String payee) {
+                        return HardcodedConfig.mappings.get(payee);
+                    }
+                });
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
         String notificationText = String.valueOf(sbn.getNotification().extras.get("android.text"));
-        new CreateYNABTransactionFromNuBankNotificationTask(createYNABTransactionFromNuBankNotification).execute(packageName, notificationText);
+        new CreateYNABTransactionFromNuBankNotificationTask(usecase).execute(packageName, notificationText);
     }
 
     private static class CreateYNABTransactionFromNuBankNotificationTask extends AsyncTask<String, Integer, Void> {
