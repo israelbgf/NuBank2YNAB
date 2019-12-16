@@ -18,7 +18,7 @@ class YNABGatewayHttp(val YNABAPIToken: String, val budgetId: String, val accoun
                 "amount" to transaction.amount,
                 "category_id" to transaction.categoryId,
                 "date" to transaction.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                "memo" to transaction.payee))
+                "memo" to transaction.memo))
 
         val postBody = JSONObject(postData).toString()
                 .toRequestBody("application/json; charset=utf-8".toMediaType())

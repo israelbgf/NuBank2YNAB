@@ -40,6 +40,13 @@ class CreateYNABTransactionFromNuBankNotificationTest {
     }
 
     @Test
+    fun `Extract memo from the notification text (which is the same as the payee)`() {
+        this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
+        assertEquals("Nice Looking Company", YNABGateway.transactions.get(0).payee)
+        assertEquals("Nice Looking Company", YNABGateway.transactions.get(0).memo)
+    }
+
+    @Test
     fun `Ignore multiple invocations until something new appears`() {
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")

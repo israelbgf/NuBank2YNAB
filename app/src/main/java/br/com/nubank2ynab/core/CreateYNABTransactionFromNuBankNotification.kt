@@ -19,6 +19,7 @@ class CreateYNABTransactionFromNuBankNotification(
         val payee = extractPayee(notificationText)
         this.YNABGateway.create(YNABTransaction(
                 payee,
+                payee,
                 extractAmount(notificationText),
                 LocalDateTime.now(), payeeToCategoryGateway.get(payee)))
     }

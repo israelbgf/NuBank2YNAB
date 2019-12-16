@@ -40,19 +40,19 @@ public class NuBankNotificationListener extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
         String notificationText = String.valueOf(sbn.getNotification().extras.get("android.text"));
-        new CreateYNABTransactionFromNuBankNotificationTask(usecase).execute(packageName, notificationText);
+        new Task(usecase).execute(packageName, notificationText);
     }
 
-    private static class CreateYNABTransactionFromNuBankNotificationTask extends AsyncTask<String, Integer, Void> {
-        private CreateYNABTransactionFromNuBankNotification createYNABTransactionFromNuBankNotification;
+    private static class Task extends AsyncTask<String, Integer, Void> {
+        private CreateYNABTransactionFromNuBankNotification usecase;
 
-        CreateYNABTransactionFromNuBankNotificationTask(CreateYNABTransactionFromNuBankNotification createYNABTransactionFromNuBankNotification) {
-            this.createYNABTransactionFromNuBankNotification = createYNABTransactionFromNuBankNotification;
+        Task(CreateYNABTransactionFromNuBankNotification usecase) {
+            this.usecase = usecase;
         }
 
         @Override
         protected Void doInBackground(String... objects) {
-            this.createYNABTransactionFromNuBankNotification.create(objects[0], objects[1]);
+            this.usecase.create(objects[0], objects[1]);
             return null;
         }
     }
