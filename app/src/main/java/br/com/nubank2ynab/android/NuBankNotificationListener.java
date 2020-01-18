@@ -7,6 +7,8 @@ import android.service.notification.StatusBarNotification;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import br.com.nubank2ynab.core.ConfigurationGateway;
+import br.com.nubank2ynab.core.ConfigurationGatewayInMemory;
 import br.com.nubank2ynab.core.CreateYNABTransactionFromNuBankNotification;
 import br.com.nubank2ynab.core.PayeeToCategoryGateway;
 
@@ -20,8 +22,12 @@ public class NuBankNotificationListener extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        ConfigurationGateway configurationGateway = new ConfigurationGatewayInMemory();
+        configurationGateway.put("NuBankAccountID", HardcodedConfig.NUBANK_ACCOUNT_ID);
+        configurationGateway.put("NuContaAccountID", HardcodedConfig.NUCONTA_ACCOUNT_ID);
+
         usecase = new CreateYNABTransactionFromNuBankNotification(
-                new YNABGatewayHttp(HardcodedConfig.YNAB_API_TOKEN, HardcodedConfig.BUDGET_ID, HardcodedConfig.ACCOUNT_ID),
+                new YNABGatewayHttp(HardcodedConfig.YNAB_API_TOKEN, HardcodedConfig.BUDGET_ID),
                 new PayeeToCategoryGateway() {
 
                     @Override
@@ -33,7 +39,7 @@ public class NuBankNotificationListener extends NotificationListenerService {
                     public String get(@NotNull String payee) {
                         return HardcodedConfig.mappings.get(payee);
                     }
-                });
+                }, configurationGateway);
     }
 
     @Override

@@ -11,10 +11,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 
-class YNABGatewayHttp(val YNABAPIToken: String, val budgetId: String, val accountId: String) : YNABGateway {
+class YNABGatewayHttp(val YNABAPIToken: String, val budgetId: String) : YNABGateway {
     override fun create(transaction: YNABTransaction) {
         val postData = mapOf("transaction" to mapOf(
-                "account_id" to accountId,
+                "account_id" to transaction.accountId,
                 "amount" to transaction.amount,
                 "category_id" to transaction.categoryId,
                 "date" to transaction.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),

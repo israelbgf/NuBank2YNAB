@@ -5,7 +5,8 @@ import java.time.ZoneOffset
 
 class CreateYNABTransactionFromNuBankNotification(
         private val YNABGateway: YNABGateway,
-        private val payeeToCategoryGateway: PayeeToCategoryGateway
+        private val payeeToCategoryGateway: PayeeToCategoryGateway,
+        private val configurationGateway: ConfigurationGateway
 ) {
 
     private var lastDuplicationTimeout: LocalDateTime = LocalDateTime.now()
@@ -17,11 +18,13 @@ class CreateYNABTransactionFromNuBankNotification(
         if (isDuplicateNotification(notificationText)) return
 
         val payee = extractPayee(notificationText)
+        val isCreditCard = notificationText.contains("APROVADA")
+        val accountId = configurationGateway.get(if (isCreditCard) "NuBankAccountID" else "NuContaAccountID")
         this.YNABGateway.create(YNABTransaction(
                 payee,
                 payee,
                 extractAmount(notificationText),
-                LocalDateTime.now(), payeeToCategoryGateway.get(payee)))
+                LocalDateTime.now(), payeeToCategoryGateway.get(payee), accountId))
     }
 
     private fun isDuplicateNotification(notificationText: String): Boolean {
@@ -50,7 +53,7 @@ class CreateYNABTransactionFromNuBankNotification(
     }
 
     private fun extractPayee(text: String): String {
-        return "APROVADA em (.*)\\.".toRegex().find(text)?.groups?.get(1)?.value ?: ""
+        return " em (.*)\\.".toRegex().find(text)?.groups?.get(1)?.value ?: ""
     }
 
 }

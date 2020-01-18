@@ -7,5 +7,6 @@ data class YNABTransaction(
         val memo: String = "",
         val amount: Int,
         val date: LocalDateTime,
-        val categoryId: String?
+        val categoryId: String?,
+        val accountId: String?
 )

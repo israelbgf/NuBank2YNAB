@@ -13,9 +13,9 @@ class YNABGatewayHttpTest {
     @Test
     fun gatewayTest() {
         val gateway = YNABGatewayHttp(HardcodedConfig.YNAB_API_TOKEN,
-                HardcodedConfig.BUDGET_ID, HardcodedConfig.ACCOUNT_ID)
+                HardcodedConfig.BUDGET_ID)
 
-        gateway.create(YNABTransaction("Test Android App", -999, LocalDateTime.now(),
-                categoryId = null))
+        gateway.create(YNABTransaction("Test Android App", "Test Android App", 2000, LocalDateTime.now(),
+                categoryId = null, accountId = HardcodedConfig.NUCONTA_ACCOUNT_ID))
     }
 }

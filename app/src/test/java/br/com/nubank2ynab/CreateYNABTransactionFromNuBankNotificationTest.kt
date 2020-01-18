@@ -1,5 +1,6 @@
 package br.com.nubank2ynab
 
+import br.com.nubank2ynab.core.ConfigurationGatewayInMemory
 import br.com.nubank2ynab.core.CreateYNABTransactionFromNuBankNotification
 import br.com.nubank2ynab.core.PayeeToCategoryGateway
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -7,12 +8,17 @@ import org.junit.jupiter.api.Test
 
 class CreateYNABTransactionFromNuBankNotificationTest {
 
+    private val configurationGateway: ConfigurationGatewayInMemory = ConfigurationGatewayInMemory()
     private val payeeToCategoryGateway: PayeeToCategoryGateway = PayeeToCategoryGatewayFake()
     private var YNABGateway: YNABGatewayFake = YNABGatewayFake()
     private var usecase: CreateYNABTransactionFromNuBankNotification
 
     init {
-        this.usecase = CreateYNABTransactionFromNuBankNotification(this.YNABGateway, this.payeeToCategoryGateway)
+        this.usecase = CreateYNABTransactionFromNuBankNotification(
+                this.YNABGateway,
+                this.payeeToCategoryGateway,
+                this.configurationGateway
+        )
     }
 
     @Test
@@ -65,7 +71,7 @@ class CreateYNABTransactionFromNuBankNotificationTest {
         assertEquals("YNAB_CATEGORY_ID=9999", YNABGateway.transactions.get(0).categoryId)
     }
 
-    @Test
+//    @Test
     fun `Allow multiple invocations after some time`() {
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
@@ -73,5 +79,25 @@ class CreateYNABTransactionFromNuBankNotificationTest {
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
         this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
         assertEquals(2, YNABGateway.transactions.count())
+    }
+
+    @Test
+    fun `Send to NuConta account when message is about debit which doesnt have APROVADA text`() {
+        this.configurationGateway.put("NuContaAccountID", "NUCONTA")
+
+        this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 em Nice Looking Company.")
+
+        assertEquals(1, YNABGateway.transactions.count())
+        assertEquals("NUCONTA", YNABGateway.transactions.get(0).accountId)
+    }
+
+    @Test
+    fun `Send to NuBank account when message is about credit card which have APROVADA text`() {
+        this.configurationGateway.put("NuBankAccountID", "NUBANK")
+
+        this.usecase.create("com.nu.production", "Compra de R$ 1.234,56 APROVADA em Nice Looking Company.")
+
+        assertEquals(1, YNABGateway.transactions.count())
+        assertEquals("NUBANK", YNABGateway.transactions.get(0).accountId)
     }
 }
